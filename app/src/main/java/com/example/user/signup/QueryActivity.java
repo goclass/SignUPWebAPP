@@ -8,7 +8,9 @@ import android.view.View;
 import android.widget.ArrayAdapter;
 import android.widget.EditText;
 import android.widget.ListView;
+import android.widget.ListAdapter;
 import android.widget.Toast;
+import android.widget.SimpleAdapter;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -20,6 +22,8 @@ import java.net.HttpURLConnection;
 import java.net.URL;
 import java.net.URLEncoder;
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
 
 public class QueryActivity extends AppCompatActivity {
 
@@ -69,6 +73,7 @@ public class QueryActivity extends AppCompatActivity {
                 data = "?phone=" + URLEncoder.encode(phoneNumber, "UTF-8");
 
                 link = "http://140.130.33.101/QueryMessage.php" + data;
+                //link = "http://140.130.33.101/QueryMessage.php" + data;
 
                 URL url = new URL(link);
 
@@ -100,16 +105,24 @@ public class QueryActivity extends AppCompatActivity {
 
                 JSONArray new_array = new JSONArray(result);
 
+                List<HashMap<String , String>> list = new ArrayList<>();
+
                 for (int i = 0, count = new_array.length(); i < count; i++) {
                     try {
+
+                        HashMap<String , String> hashMap = new HashMap<>();
 
                         JSONObject jsonObject = new_array.getJSONObject(i);
 
                         String msg = jsonObject.getString("msg").toString();
+                        String created_date = jsonObject.getString("created_date").toString();
+
+                        hashMap.put("msg" , msg);
+                        hashMap.put("created_date" , created_date);
+
+                        list.add(hashMap);
 
                         stringArray.add(msg);
-
-                        Log.d("result=", msg);
 
                     } catch (JSONException e) {
 
@@ -117,9 +130,18 @@ public class QueryActivity extends AppCompatActivity {
                     }
                 }
 
-                ArrayAdapter adapter = new ArrayAdapter(QueryActivity.this, android.R.layout.simple_list_item_1, stringArray);
+                //ArrayAdapter adapter = new ArrayAdapter(QueryActivity.this, android.R.layout.simple_list_item_1, stringArray);
 
-                listView.setAdapter(adapter);
+                //listView.setAdapter(adapter);
+
+                ListAdapter listAdapter = new SimpleAdapter(
+                        QueryActivity.this,
+                        list,
+                        android.R.layout.simple_list_item_2 ,
+                        new String[]{"msg" , "created_date"} ,
+                        new int[]{android.R.id.text1 , android.R.id.text2});
+
+                listView.setAdapter(listAdapter);
 
             } catch (JSONException e) {
 
